@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <title>Thai Lotto AI</title>
+  <link rel="icon" type="image/x-icon" href="icon.ico">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <div class="header-row">
+      <h1 id="pageTitle">Thai Lotto AI Predictor</h1>
+      <button id="langToggle" class="lang-toggle" onclick="toggleLanguage()">
+        <span class="lang-en active">EN</span>
+        <span class="lang-sep">|</span>
+        <span class="lang-th">ไทย</span>
+      </button>
+    </div>
+
+    <button onclick="loadPredictions()" id="predictBtn">
+      Predict All
+    </button>
+
+    <p id="status" class="status">Click to Load predictions</p>
+
+    <div class="card">
+      <h2 id="top2SummaryHeader">Top 2 Summary</h2>
+      <small id="top2SummaryNote">Last 2 digits of the 1st prize</small>
+      <p id="twoDigit"></p>
+    </div>
+
+    <div class="card">
+      <h2 id="top3SummaryHeader">Top 3 Summary</h2>
+      <small id="top3SummaryNote">Last 3 digits of the 1st prize</small>
+      <p id="threeDigit"></p>
+    </div>
+
+    <div class="card">
+      <h2 id="top6SummaryHeader">Top 6 Summary</h2>
+      <small id="top6SummaryNote">Full 6 digits of the 1st prize</small>
+      <p id="sixDigit"></p>
+    </div>
+
+    <div class="card">
+      <h2 id="hotNumbersHeader">Hot Numbers</h2>
+      <p id="hotNumbers"></p>
+    </div>
+
+    <div class="card">
+      <h2 id="coldNumbersHeader">Cold Numbers</h2>
+      <p id="coldNumbers"></p>
+    </div>
+
+    <div class="card">
+      <h2 id="historyHeader">Total Historical Draws</h2>
+      <p id="historyCount"></p>
+    </div>
+
+    <h2 id="bettingMarketsHeader">Betting Markets</h2>
+
+    <div id="marketPredictions" class="market-grid"></div>
+
+  </div>
+
+  <script src="dashboard.js"></script>
+
+</body>
+</html>

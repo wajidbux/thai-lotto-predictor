@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: thai-lotto-predictor
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 22.x
+      - key: PORT
+        value: 3000
