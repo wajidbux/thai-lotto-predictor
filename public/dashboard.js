@@ -11,11 +11,16 @@ const TH = {
   top2SummaryNote: "เลข 2 ตัวท้ายของรางวัลที่ 1",
   top3Summary: "สรุปเลข 3 ตัวบน",
   top3SummaryNote: "เลข 3 ตัวท้ายของรางวัลที่ 1",
+  top4Summary: "สรุปเลข 4 ตัวบน",
+  top4SummaryNote: "เลข 4 ตัวท้ายของรางวัลที่ 1",
+  top5Summary: "สรุปเลข 5 ตัวบน",
+  top5SummaryNote: "เลข 5 ตัวท้ายของรางวัลที่ 1",
   top6Summary: "สรุปเลข 6 ตัวบน",
   top6SummaryNote: "เลข 6 ตัวเต็มของรางวัลที่ 1",
   hotNumbers: "เลขเด่น",
   coldNumbers: "เลขรอง",
   historyHeader: "จำนวนงวดที่บันทึก",
+  lastUpdated: "อัปเดตล่าสุด",
   bettingMarkets: "ตลาดการเดิมพัน",
   // Pool card
   poolTitle: "🎯 กลุ่มเลขตามตำแหน่งรางวัลที่ 1",
@@ -25,8 +30,11 @@ const TH = {
   poolLast2: "2 หลักท้าย",
   poolViewExact: (n) => `ดูคำทำนายที่แน่นอน (${n})`,
   // Market labels
-  fourRow: { title: "4 แถว", note: "เรียงสับเปลี่ยนของ 4 ตัวบน" },
-  threeRow: { title: "3 แถว", note: "เรียงสับเปลี่ยนของ 3 ตัวบน" },
+  fourRow: { title: "4 แถว", note: "6 คู่จากเลข 4 ตัวบน" },
+  fourReverse: { title: "กลับ 4 ตัว", note: "ช่วยเรียงสับเปลี่ยนเลข 4 ตัว" },
+  top5: { title: "5 ตัวบน", note: "เลข 5 ตัวท้ายของรางวัลที่ 1" },
+  top4: { title: "4 ตัวบน", note: "เลข 4 ตัวท้ายของรางวัลที่ 1" },
+  threeRow: { title: "3 แถว", note: "3 คู่จากเลข 3 ตัวบน" },
   bottom3: { title: "เลข 3 ตัวล่าง", note: "รางวัลเลขหน้า/หลัง 3 ตัว" },
   threeReverse: { title: "กลับ 3 ตัว", note: "ช่วยเรียงสับเปลี่ยนเลข 3 ตัว" },
   bottom2: { title: "เลข 2 ตัวล่าง", note: "รางวัลเลข 2 ตัวท้าย" },
@@ -92,6 +100,10 @@ function applyTranslations() {
     top2SummaryNote: "top2SummaryNote",
     top3SummaryHeader: "top3Summary",
     top3SummaryNote: "top3SummaryNote",
+    top4SummaryHeader: "top4Summary",
+    top4SummaryNote: "top4SummaryNote",
+    top5SummaryHeader: "top5Summary",
+    top5SummaryNote: "top5SummaryNote",
     top6SummaryHeader: "top6Summary",
     top6SummaryNote: "top6SummaryNote",
     hotNumbersHeader: "hotNumbers",
@@ -110,6 +122,10 @@ function applyTranslations() {
         top2SummaryNote: "Last 2 digits of the 1st prize",
         top3SummaryHeader: "Top 3 Summary",
         top3SummaryNote: "Last 3 digits of the 1st prize",
+        top4SummaryHeader: "Top 4 Summary",
+        top4SummaryNote: "Last 4 digits of the 1st prize",
+        top5SummaryHeader: "Top 5 Summary",
+        top5SummaryNote: "Last 5 digits of the 1st prize",
         top6SummaryHeader: "Top 6 Summary",
         top6SummaryNote: "Full 6 digits of the 1st prize",
         hotNumbersHeader: "Hot Numbers",
@@ -119,6 +135,13 @@ function applyTranslations() {
       };
       if (defaults[id]) document.getElementById(id).textContent = defaults[id];
     }
+  }
+
+  // Handle last updated note separately (has dynamic timestamp)
+  const lastEl = document.getElementById("lastUpdatedNote");
+  if (lastEl && lastEl.dataset.lastIngest) {
+    const prefix = t("lastUpdated") || "Last updated";
+    lastEl.textContent = `${prefix}: ${lastEl.dataset.lastIngest}`;
   }
 }
 
@@ -152,6 +175,12 @@ async function loadPredictions() {
     document.getElementById("sixDigit").innerHTML =
       data.sixDigit.join(", ");
 
+    document.getElementById("fiveDigit").innerHTML =
+      (data.markets.top5 || []).join(", ");
+
+    document.getElementById("fourDigit").innerHTML =
+      (data.markets.top4 || []).join(", ");
+
     document.getElementById("hotNumbers").innerHTML =
       data.hotNumbers.join(", ");
 
@@ -160,6 +189,16 @@ async function loadPredictions() {
 
     document.getElementById("historyCount").innerHTML =
       data.totalHistory;
+
+    // Show last updated time
+    const lastUpdatedEl = document.getElementById("lastUpdatedNote");
+    if (lastUpdatedEl && data.lastIngest) {
+      const d = new Date(data.lastIngest);
+      const localTime = d.toLocaleString();
+      lastUpdatedEl.dataset.lastIngest = localTime;
+      const prefix = t("lastUpdated") || "Last updated";
+      lastUpdatedEl.textContent = `${prefix}: ${localTime}`;
+    }
 
     renderMarkets(data.markets || {});
 
@@ -269,7 +308,10 @@ function renderDigitPools(pools, allMarkets, skipApply) {
 
 function renderMarketCards(markets, skipApply) {
   const labels = {
+    top5: { titleKey: "top5" },
+    top4: { titleKey: "top4" },
     fourRow: { titleKey: "fourRow" },
+    fourReverse: { titleKey: "fourReverse" },
     threeRow: { titleKey: "threeRow" },
     bottom3: { titleKey: "bottom3" },
     threeReverse: { titleKey: "threeReverse" },
@@ -289,12 +331,15 @@ function renderMarketCards(markets, skipApply) {
 
       // English defaults
       const enLabels = {
-        fourRow: { title: "4 Row", note: "Permutations of Top 4" },
-        threeRow: { title: "3 Row", note: "Permutations of Top 3" },
+        top5: { title: "Top 5 Digits", note: "Last 5 digits of the 1st prize" },
+        top4: { title: "Top 4 Digits", note: "Last 4 digits of the 1st prize" },
+        fourRow: { title: "4 Row", note: "6 pairs from Top 4" },
+        fourReverse: { title: "4 Reverse Numbers", note: "All 24 permutations of 4-digit bets" },
+        threeRow: { title: "3 Row", note: "3 pairs from Top 3" },
         bottom3: { title: "Bottom 3 Digits", note: "Official front/back 3-digit prizes" },
-        threeReverse: { title: "3 Reverse Numbers", note: "Permutation helper for 3-digit bets" },
+        threeReverse: { title: "3 Reverse Numbers", note: "All 6 permutations of 3-digit bets" },
         bottom2: { title: "Bottom 2 Digits", note: "Official last 2 digits prize" },
-        twoReverse: { title: "2 Reverse Digits", note: "Permutation helper for 2-digit bets" },
+        twoReverse: { title: "2 Reverse Digits", note: "Both orders of each 2-digit pair" },
         twoRow: { title: "2 Row", note: "2 digits appearing in Top 3" },
         runningTop: { title: "Top 1 Digit / Running Top", note: "Digits appearing in Top 3" },
         runningBottom: { title: "Bottom 1 Digit / Running Bottom", note: "Digits appearing in Bottom 2" }

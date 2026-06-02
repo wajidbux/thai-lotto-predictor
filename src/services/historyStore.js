@@ -113,9 +113,14 @@ function upsertDraws(draws) {
   }, readHistory());
 }
 
+function getHistoryPath() {
+  return HISTORY_PATH;
+}
+
 module.exports = {
   readHistory,
   upsertDraw,
   upsertDraws,
-  writeHistory
+  writeHistory,
+  getHistoryPath
 };

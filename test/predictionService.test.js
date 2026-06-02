@@ -66,8 +66,8 @@ test("top markets use position-based predictions", () => {
 
     // Position-based predictions are now primary (not raw historical values)
     assert.deepEqual(markets.top6.slice(0, 3), ["107387", "340258", "891123"]);
-    assert.deepEqual(markets.top5.slice(0, 3), ["07387", "40258", "91123"]);
-    assert.deepEqual(markets.top4.slice(0, 3), ["7387", "0258", "1123"]);
+    assert.deepEqual(markets.top5.slice(0, 3), ["07387", "47258", "90123"]);
+    assert.deepEqual(markets.top4.slice(0, 3), ["7387", "7258", "0123"]);
     assert.deepEqual(markets.top3.slice(0, 3), ["387", "258", "123"]);
     assert.deepEqual(markets.top2.slice(0, 3), ["87", "58", "23"]);
   });
@@ -152,15 +152,29 @@ test("row and reverse helpers expand all covered permutations", () => {
     const { getPredictions } = freshPredictionService();
     const { markets } = getPredictions();
 
+    // fourRow: pairs from the 4-digit prediction (C(4,2) = 6 pairs per base)
     assert.equal(markets.fourRow[0].base, "7387");
     assert.deepEqual(
       markets.fourRow[0].covers,
+      ["73", "78", "77", "38", "37", "87"]
+    );
+
+    // threeRow: pairs from the 3-digit prediction (C(3,2) = 3 pairs per base)
+    assert.equal(markets.threeRow[0].base, "387");
+    assert.deepEqual(markets.threeRow[0].covers, ["38", "37", "87"]);
+
+    // fourReverse: 24 permutations (unchanged)
+    assert.equal(markets.fourReverse[0].base, "7387");
+    assert.deepEqual(
+      markets.fourReverse[0].covers,
       ["7387", "7378", "7837", "7873", "7738", "7783", "3787", "3778", "3877", "8737", "8773", "8377"]
     );
 
+    // threeReverse: 6 permutations (unchanged)
     assert.equal(markets.threeReverse[0].base, "387");
     assert.deepEqual(markets.threeReverse[0].covers, ["387", "378", "837", "873", "738", "783"]);
 
+    // twoReverse: 2 permutations (unchanged)
     assert.equal(markets.twoReverse[0].base, "87");
     assert.deepEqual(markets.twoReverse[0].covers, ["87", "78"]);
   });

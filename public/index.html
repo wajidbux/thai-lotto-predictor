@@ -14,9 +14,50 @@
     <div class="header-row">
       <h1 id="pageTitle">Thai Lotto AI Predictor</h1>
       <button id="langToggle" class="lang-toggle" onclick="toggleLanguage()">
-        <span class="lang-en active">EN</span>
+        <span class="lang-en active">
+          <svg class="flag-icon" viewBox="0 0 60 40" width="24" height="16">
+            <rect width="60" height="40" fill="#FFF"/>
+            <rect width="60" height="3.08" y="0" fill="#B22234"/>
+            <rect width="60" height="3.08" y="6.15" fill="#B22234"/>
+            <rect width="60" height="3.08" y="12.31" fill="#B22234"/>
+            <rect width="60" height="3.08" y="18.46" fill="#B22234"/>
+            <rect width="60" height="3.08" y="24.62" fill="#B22234"/>
+            <rect width="60" height="3.08" y="30.77" fill="#B22234"/>
+            <rect width="60" height="3.08" y="36.92" fill="#B22234"/>
+            <rect width="24" height="21.54" fill="#3C3B6E"/>
+            <circle cx="3" cy="3.08" r="0.7" fill="#FFF"/>
+            <circle cx="9" cy="3.08" r="0.7" fill="#FFF"/>
+            <circle cx="15" cy="3.08" r="0.7" fill="#FFF"/>
+            <circle cx="21" cy="3.08" r="0.7" fill="#FFF"/>
+            <circle cx="6" cy="6.15" r="0.7" fill="#FFF"/>
+            <circle cx="12" cy="6.15" r="0.7" fill="#FFF"/>
+            <circle cx="18" cy="6.15" r="0.7" fill="#FFF"/>
+            <circle cx="3" cy="9.23" r="0.7" fill="#FFF"/>
+            <circle cx="9" cy="9.23" r="0.7" fill="#FFF"/>
+            <circle cx="15" cy="9.23" r="0.7" fill="#FFF"/>
+            <circle cx="21" cy="9.23" r="0.7" fill="#FFF"/>
+            <circle cx="6" cy="12.31" r="0.7" fill="#FFF"/>
+            <circle cx="12" cy="12.31" r="0.7" fill="#FFF"/>
+            <circle cx="18" cy="12.31" r="0.7" fill="#FFF"/>
+            <circle cx="3" cy="15.38" r="0.7" fill="#FFF"/>
+            <circle cx="9" cy="15.38" r="0.7" fill="#FFF"/>
+            <circle cx="15" cy="15.38" r="0.7" fill="#FFF"/>
+            <circle cx="21" cy="15.38" r="0.7" fill="#FFF"/>
+            <circle cx="6" cy="18.46" r="0.7" fill="#FFF"/>
+            <circle cx="12" cy="18.46" r="0.7" fill="#FFF"/>
+            <circle cx="18" cy="18.46" r="0.7" fill="#FFF"/>
+          </svg>
+        </span>
         <span class="lang-sep">|</span>
-        <span class="lang-th">ไทย</span>
+        <span class="lang-th">
+          <svg class="flag-icon" viewBox="0 0 60 40" width="24" height="16">
+            <rect width="60" height="4" fill="#ED1C24"/>
+            <rect width="60" y="4" height="8" fill="#FFF"/>
+            <rect width="60" y="12" height="16" fill="#241D4F"/>
+            <rect width="60" y="28" height="8" fill="#FFF"/>
+            <rect width="60" y="36" height="4" fill="#ED1C24"/>
+          </svg>
+        </span>
       </button>
     </div>
 
@@ -45,6 +86,18 @@
     </div>
 
     <div class="card">
+      <h2 id="top5SummaryHeader">Top 5 Summary</h2>
+      <small id="top5SummaryNote">Last 5 digits of the 1st prize</small>
+      <p id="fiveDigit"></p>
+    </div>
+
+    <div class="card">
+      <h2 id="top4SummaryHeader">Top 4 Summary</h2>
+      <small id="top4SummaryNote">Last 4 digits of the 1st prize</small>
+      <p id="fourDigit"></p>
+    </div>
+
+    <div class="card">
       <h2 id="hotNumbersHeader">Hot Numbers</h2>
       <p id="hotNumbers"></p>
     </div>
@@ -57,6 +110,7 @@
     <div class="card">
       <h2 id="historyHeader">Total Historical Draws</h2>
       <p id="historyCount"></p>
+      <small id="lastUpdatedNote" style="color: #6b7280; font-size: 13px; margin-top: 8px; display: block;"></small>
     </div>
 
     <h2 id="bettingMarketsHeader">Betting Markets</h2>

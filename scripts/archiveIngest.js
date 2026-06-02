@@ -25,7 +25,13 @@ async function archiveIngest() {
       const latestDraw = await scrapeLatestDraw();
 
       if (validateDraw(latestDraw)) {
-        history = upsertDraws([latestDraw]);
+        // Manual dedup against the in-memory history (avoid re-reading the file)
+        const firstPrize = latestDraw.prizes.first.number[0];
+        history = history.filter(item => {
+          const existingPrize = item?.prizes?.first?.number?.[0];
+          return item.date !== latestDraw.date && existingPrize !== firstPrize;
+        });
+        history.unshift(latestDraw);
       }
     } catch (_) {
       // GLO is a supplement; failure is non-fatal
