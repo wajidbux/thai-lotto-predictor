@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 const predictRoutes = require("./src/routes/predictRoutes");
+const scrapeRoutes = require("./src/routes/scrapeRoutes");
 
 app.use("/predict", (req, res, next) => {
   res.set("Cache-Control", "no-store");
@@ -17,6 +18,7 @@ app.use("/predict", (req, res, next) => {
 });
 
 app.use("/predict", predictRoutes);
+app.use("/scrape", scrapeRoutes);
 
 require("./src/jobs/autoIngest");
 require("./src/jobs/autoRetrain");

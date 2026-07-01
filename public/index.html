@@ -61,9 +61,14 @@
       </button>
     </div>
 
-    <button onclick="loadPredictions()" id="predictBtn">
-      Predict All
-    </button>
+    <div class="button-row">
+      <button onclick="loadPredictions()" id="predictBtn">
+        Predict All
+      </button>
+      <button onclick="refreshData()" id="refreshBtn" class="btn-secondary">
+        ↻ Refresh Data
+      </button>
+    </div>
 
     <p id="status" class="status">Click to Load predictions</p>
 

@@ -11,17 +11,41 @@ body {
   margin: auto;
 }
 
+.button-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.button-row button {
+  margin-bottom: 0;
+}
+
 button {
   background: #2563eb;
   color: white;
   border: none;
   padding: 18px 32px;
   cursor: pointer;
-  margin-bottom: 24px;
   border-radius: 10px;
   font-size: 20px;
   font-weight: bold;
   touch-action: manipulation;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #374151;
+  border: 1px solid #4b5563;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #4b5563;
 }
 
 .header-row {

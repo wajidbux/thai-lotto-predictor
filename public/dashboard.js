@@ -4,6 +4,10 @@ const TH = {
   // Header
   pageTitle: "เครื่องทำนายหวยไทย",
   predictBtn: "พยากรณ์ทั้งหมด",
+  refreshBtn: "↻ อัปเดตข้อมูล",
+  refreshing: "กำลังอัปเดตข้อมูล...",
+  refreshSuccess: "อัปเดตข้อมูลสำเร็จ!",
+  refreshFail: "อัปเดตล้มเหลว",
   loading: "คลิกเพื่อโหลดคำทำนาย",
   loaded: (n) => `โหลดแล้ว ${n} ตลาดการเดิมพัน`,
   // Summary cards
@@ -79,6 +83,11 @@ function applyTranslations() {
   if (btnText) document.getElementById("predictBtn").textContent = btnText;
   else if (currentLang === "en") document.getElementById("predictBtn").textContent = "Predict All";
 
+  // Refresh button
+  const refreshText = t("refreshBtn");
+  if (refreshText) document.getElementById("refreshBtn").textContent = refreshText;
+  else if (currentLang === "en") document.getElementById("refreshBtn").textContent = "↻ Refresh Data";
+
   const status = document.getElementById("status");
   if (status && currentLang === "th") {
     const text = status.textContent;
@@ -145,7 +154,91 @@ function applyTranslations() {
   }
 }
 
+// ---- Refresh Data (Scrape + Retrain) ----
+
+async function refreshData() {
+  const btn = document.getElementById("refreshBtn");
+  const status = document.getElementById("status");
+  const refreshingText = t("refreshing") || "Refreshing data...";
+
+  if (!btn) return;
+
+  btn.disabled = true;
+  btn.textContent = t("refreshing") || "↻ Refreshing...";
+  if (status) status.textContent = refreshingText;
+
+  try {
+    const res = await fetch("/scrape", {
+      method: "POST",
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error(`Refresh failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    // Populate all cards with fresh data
+    populatePredictions(data.predictions);
+
+    if (status) {
+      const msg = data.success
+        ? (t("refreshSuccess") || "Data refreshed successfully!")
+        : data.message;
+      status.textContent = msg;
+    }
+  } catch (err) {
+    if (status) {
+      status.textContent = `${t("refreshFail") || "Refresh failed"}: ${err.message}`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t("refreshBtn") || "↻ Refresh Data";
+  }
+}
+
 // ---- Prediction Loading ----
+
+// ---- Population Helper (shared by loadPredictions & refreshData) ----
+
+function populatePredictions(data) {
+  document.getElementById("twoDigit").innerHTML =
+    data.twoDigit.join(", ");
+
+  document.getElementById("threeDigit").innerHTML =
+    data.threeDigit.join(", ");
+
+  document.getElementById("sixDigit").innerHTML =
+    data.sixDigit.join(", ");
+
+  document.getElementById("fiveDigit").innerHTML =
+    (data.markets.top5 || []).join(", ");
+
+  document.getElementById("fourDigit").innerHTML =
+    (data.markets.top4 || []).join(", ");
+
+  document.getElementById("hotNumbers").innerHTML =
+    data.hotNumbers.join(", ");
+
+  document.getElementById("coldNumbers").innerHTML =
+    data.coldNumbers.join(", ");
+
+  document.getElementById("historyCount").innerHTML =
+    data.totalHistory;
+
+  // Show last updated time
+  const lastUpdatedEl = document.getElementById("lastUpdatedNote");
+  if (lastUpdatedEl && data.lastIngest) {
+    const d = new Date(data.lastIngest);
+    const localTime = d.toLocaleString();
+    lastUpdatedEl.dataset.lastIngest = localTime;
+    const prefix = t("lastUpdated") || "Last updated";
+    lastUpdatedEl.textContent = `${prefix}: ${localTime}`;
+  }
+
+  renderMarkets(data.markets || {});
+}
 
 async function loadPredictions() {
   const status = document.getElementById("status");
@@ -166,41 +259,7 @@ async function loadPredictions() {
 
     const data = await res.json();
 
-    document.getElementById("twoDigit").innerHTML =
-      data.twoDigit.join(", ");
-
-    document.getElementById("threeDigit").innerHTML =
-      data.threeDigit.join(", ");
-
-    document.getElementById("sixDigit").innerHTML =
-      data.sixDigit.join(", ");
-
-    document.getElementById("fiveDigit").innerHTML =
-      (data.markets.top5 || []).join(", ");
-
-    document.getElementById("fourDigit").innerHTML =
-      (data.markets.top4 || []).join(", ");
-
-    document.getElementById("hotNumbers").innerHTML =
-      data.hotNumbers.join(", ");
-
-    document.getElementById("coldNumbers").innerHTML =
-      data.coldNumbers.join(", ");
-
-    document.getElementById("historyCount").innerHTML =
-      data.totalHistory;
-
-    // Show last updated time
-    const lastUpdatedEl = document.getElementById("lastUpdatedNote");
-    if (lastUpdatedEl && data.lastIngest) {
-      const d = new Date(data.lastIngest);
-      const localTime = d.toLocaleString();
-      lastUpdatedEl.dataset.lastIngest = localTime;
-      const prefix = t("lastUpdated") || "Last updated";
-      lastUpdatedEl.textContent = `${prefix}: ${localTime}`;
-    }
-
-    renderMarkets(data.markets || {});
+    populatePredictions(data);
 
     if (status) {
       const loadedText = t("loaded", Object.keys(data.markets || {}).length) ||
