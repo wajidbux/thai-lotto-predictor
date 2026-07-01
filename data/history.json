@@ -1,6 +1,36 @@
 [
   {
     "source": "glo",
+    "date": "2026-07-01",
+    "prizes": {
+      "first": {
+        "prize": 6000000,
+        "number": [
+          "751495"
+        ]
+      },
+      "last_two": {
+        "prize": 2000,
+        "number": "62"
+      },
+      "last_three_front": {
+        "prize": 4000,
+        "numbers": [
+          "001",
+          "980"
+        ]
+      },
+      "last_three_back": {
+        "prize": 4000,
+        "numbers": [
+          "304",
+          "531"
+        ]
+      }
+    }
+  },
+  {
+    "source": "glo",
     "date": "2026-06-01",
     "prizes": {
       "first": {
