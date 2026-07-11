@@ -159,13 +159,12 @@ function applyTranslations() {
 async function refreshData() {
   const btn = document.getElementById("refreshBtn");
   const status = document.getElementById("status");
-  const refreshingText = t("refreshing") || "Refreshing data...";
 
   if (!btn) return;
 
   btn.disabled = true;
   btn.textContent = t("refreshing") || "↻ Refreshing...";
-  if (status) status.textContent = refreshingText;
+  if (status) status.textContent = t("refreshing") || "Refreshing data...";
 
   try {
     const res = await fetch("/scrape", {
@@ -174,23 +173,31 @@ async function refreshData() {
     });
 
     if (!res.ok) {
-      throw new Error(`Refresh failed: ${res.status}`);
+      throw new Error(`Refresh failed (HTTP ${res.status})`);
     }
 
     const data = await res.json();
 
-    // Populate all cards with fresh data
-    populatePredictions(data.predictions);
+    // Always populate cards (even on scrape failure, we have existing data)
+    if (data.predictions) {
+      populatePredictions(data.predictions);
+    }
 
     if (status) {
-      const msg = data.success
-        ? (t("refreshSuccess") || "Data refreshed successfully!")
-        : data.message;
-      status.textContent = msg;
+      if (data.success) {
+        status.textContent = t("refreshSuccess") || "✅ Data refreshed successfully!";
+      } else {
+        status.textContent = `⚠️ ${data.message || "Refresh failed"}`;
+        // Flash the status red momentarily to draw attention
+        status.style.color = "#fbbf24";
+        setTimeout(() => { status.style.color = "#bfdbfe"; }, 4000);
+      }
     }
   } catch (err) {
     if (status) {
-      status.textContent = `${t("refreshFail") || "Refresh failed"}: ${err.message}`;
+      status.textContent = `${t("refreshFail") || "❌ Refresh failed"}: ${err.message}`;
+      status.style.color = "#f87171";
+      setTimeout(() => { status.style.color = "#bfdbfe"; }, 4000);
     }
   } finally {
     btn.disabled = false;

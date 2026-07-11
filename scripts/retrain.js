@@ -1,24 +1,14 @@
-const fs = require("fs");
-const path = require("path");
 const { getPredictions } = require("../src/services/predictionService");
 
 async function retrain() {
-  try {
-    console.log("Recalculating statistical prediction cache...");
+  console.log("Recalculating statistical prediction cache...");
 
-    const predictions = getPredictions();
-    const cachePath = path.join(__dirname, "..", "data", "cache.json");
+  // The in-memory cache inside predictionService will be auto-invalidated
+  // when history.json mtime changes. Calling getPredictions() ensures
+  // the cache is refreshed and available for subsequent API calls.
+  const predictions = getPredictions();
 
-    fs.writeFileSync(
-      cachePath,
-      JSON.stringify(predictions, null, 2)
-    );
-
-    console.log(`Retrain complete. History rows: ${predictions.totalHistory}`);
-  } catch (err) {
-    console.error("Retrain failed:", err.message);
-    process.exitCode = 1;
-  }
+  console.log(`Retrain complete. History rows: ${predictions.totalHistory}`);
 }
 
 if (require.main === module) {

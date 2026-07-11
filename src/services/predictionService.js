@@ -3,6 +3,39 @@ const path = require("path");
 const { readHistory, getHistoryPath } = require("./historyStore");
 const { normalizeDigits } = require("../utils/validator");
 
+// ---- In-memory prediction cache ----
+// Avoids recomputing predictions on every API call.
+// Cache is invalidated when history.json's mtime changes.
+
+let _cachedPredictions = null;
+let _cachedMtime = null;
+
+function invalidateCache() {
+  _cachedPredictions = null;
+  _cachedMtime = null;
+}
+
+function getCachedPredictions() {
+  try {
+    const stat = fs.statSync(getHistoryPath());
+    const currentMtime = stat.mtime.getTime();
+
+    if (_cachedPredictions && _cachedMtime === currentMtime) {
+      return _cachedPredictions;
+    }
+
+    // Cache miss or stale — recompute
+    _cachedPredictions = computePredictions();
+    _cachedMtime = currentMtime;
+    return _cachedPredictions;
+  } catch {
+    // If stat fails, fall through to fresh compute
+    invalidateCache();
+    _cachedPredictions = computePredictions();
+    return _cachedPredictions;
+  }
+}
+
 // ---- Global digit counting (used for hot/cold display only) ----
 
 function countDigits(numbers) {
@@ -238,7 +271,7 @@ function getTop5ByFrequency(firstPrizes, count = 5) {
 }
 
 
-function getPredictions() {
+function computePredictions() {
   const history = readHistory();
   const firstPrizes = history
     .map(draw => normalizeDigits(draw?.prizes?.first?.number?.[0], 6))
@@ -385,6 +418,15 @@ function getPredictions() {
   };
 }
 
+/**
+ * getPredictions() — public entry point.
+ * Uses in-memory cache that auto-invalidates when history.json mtime changes.
+ */
+function getPredictions() {
+  return getCachedPredictions();
+}
+
 module.exports = {
-  getPredictions
+  getPredictions,
+  invalidateCache
 };
