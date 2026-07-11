@@ -33,6 +33,16 @@ const TH = {
   poolLast3: "3 หลักท้าย",
   poolLast2: "2 หลักท้าย",
   poolViewExact: (n) => `ดูคำทำนายที่แน่นอน (${n})`,
+  // Health card
+  healthHeader: "สถานะระบบ",
+  serverUptime: "เวลาทำงาน",
+  serverStarted: "เริ่มทำงานเมื่อ",
+  memoryUsage: "การใช้หน่วยความจำ",
+  nodeVersion: "เวอร์ชัน Node",
+  lastScrape: "ดึงข้อมูลล่าสุด",
+  lastRetrain: "คำนวณล่าสุด",
+  never: "ไม่เคย",
+  justNow: "เมื่อกี้",
   // Market labels
   fourRow: { title: "4 แถว", note: "6 คู่จากเลข 4 ตัวบน" },
   fourReverse: { title: "กลับ 4 ตัว", note: "ช่วยเรียงสับเปลี่ยนเลข 4 ตัว" },
@@ -146,6 +156,30 @@ function applyTranslations() {
     }
   }
 
+  // Health card labels — only update static labels, dynamic values are set by loadHealth()
+  const healthLabels = {
+    healthUptimeLabel: t("serverUptime") || "Server Uptime",
+    healthStartedLabel: t("serverStarted") || "Server Started",
+    healthMemoryLabel: t("memoryUsage") || "Memory Usage",
+    healthNodeLabel: t("nodeVersion") || "Node Version",
+    healthScrapeLabel: t("lastScrape") || "Last Scrape",
+    healthRetrainLabel: t("lastRetrain") || "Last Retrain"
+  };
+  for (const [id, label] of Object.entries(healthLabels)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  }
+
+  // Health card header
+  const healthHeader = document.getElementById("healthHeader");
+  if (healthHeader) {
+    const thLabel = t("healthHeader");
+    if (thLabel) {
+      const dot = healthHeader.querySelector(".health-dot");
+      healthHeader.innerHTML = `<span class="${dot.className}"></span> ${thLabel}`;
+    }
+  }
+
   // Handle last updated note separately (has dynamic timestamp)
   const lastEl = document.getElementById("lastUpdatedNote");
   if (lastEl && lastEl.dataset.lastIngest) {
@@ -182,6 +216,9 @@ async function refreshData() {
     if (data.predictions) {
       populatePredictions(data.predictions);
     }
+
+    // Refresh health card after operation
+    loadHealth();
 
     if (status) {
       if (data.success) {
@@ -444,7 +481,114 @@ function renderMarkets(markets) {
   container.innerHTML = poolsHtml + marketsHtml;
 }
 
-// Apply language on page load
+// ---- System Health Card ----
+
+function formatUptime(seconds) {
+  if (seconds == null) return "—";
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const parts = [];
+  if (d > 0) parts.push(`${d}d`);
+  if (h > 0) parts.push(`${h}h`);
+  if (m > 0) parts.push(`${m}m`);
+  parts.push(`${s}s`);
+  return parts.join(" ");
+}
+
+function formatTimeAgo(dateStr) {
+  if (!dateStr) return t("never") || "Never";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  if (diff < 5000) return t("justNow") || "Just now";
+  if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`;
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+  return `${Math.floor(diff / 86400000)}d ago`;
+}
+
+function setHealthEventIcon(el, success) {
+  if (success === true) {
+    el.textContent = "✅";
+  } else if (success === false) {
+    el.textContent = "❌";
+  } else {
+    el.textContent = "⏳";
+  }
+}
+
+function healthMsgClass(msg, success) {
+  if (!msg) return "";
+  if (success === true) return "success";
+  if (success === false) return "error";
+  return "";
+}
+
+async function loadHealth() {
+  const card = document.getElementById("healthCard");
+  if (!card) return;
+
+  try {
+    const res = await fetch("/health", { cache: "no-store" });
+    if (!res.ok) return;
+
+    const h = await res.json();
+
+    // Update dot based on overall status
+    const dot = document.getElementById("healthStatusDot");
+    if (dot) {
+      const hasScrapeIssue = h.scrape && h.scrape.lastSuccess === false;
+      const hasRetrainIssue = h.retrain && h.retrain.lastSuccess === false;
+      if (hasScrapeIssue || hasRetrainIssue) {
+        dot.className = "health-dot health-dot-err";
+      } else if (h.scrape && h.scrape.lastSuccess === null) {
+        dot.className = "health-dot health-dot-warn";
+      } else {
+        dot.className = "health-dot health-dot-ok";
+      }
+    }
+
+    // Header
+    const healthHeader = document.getElementById("healthHeader");
+    if (healthHeader) {
+      const label = t("healthHeader") || "System Health";
+      const dot = healthHeader.querySelector(".health-dot");
+      healthHeader.innerHTML = `<span class="${dot.className}"></span> ${label}`;
+    }
+
+    // Grid stats
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val || "—";
+    };
+    setVal("healthUptime", formatUptime(h.uptimeSeconds));
+    setVal("healthStarted", h.serverStartedAt ? new Date(h.serverStartedAt).toLocaleString() : "—");
+    setVal("healthMemory", h.memoryUsageMB ? `${h.memoryUsageMB} MB` : "—");
+    setVal("healthNode", h.nodeVersion || "—");
+
+    // Scrape event
+    setVal("healthScrapeTime", formatTimeAgo(h.scrape?.lastAttempt));
+    const scrapeMsg = document.getElementById("healthScrapeMsg");
+    if (scrapeMsg) {
+      scrapeMsg.textContent = h.scrape?.lastMessage || "";
+      scrapeMsg.className = "health-event-msg " + healthMsgClass(h.scrape?.lastMessage, h.scrape?.lastSuccess);
+    }
+    setHealthEventIcon(document.getElementById("scrapeIcon"), h.scrape?.lastSuccess);
+
+    // Retrain event
+    setVal("healthRetrainTime", formatTimeAgo(h.retrain?.lastAttempt));
+    const retrainMsg = document.getElementById("healthRetrainMsg");
+    if (retrainMsg) {
+      retrainMsg.textContent = h.retrain?.lastMessage || "";
+      retrainMsg.className = "health-event-msg " + healthMsgClass(h.retrain?.lastMessage, h.retrain?.lastSuccess);
+    }
+    setHealthEventIcon(document.getElementById("retrainIcon"), h.retrain?.lastSuccess);
+  } catch {
+    // Silently fail — health card will show dashes
+  }
+}
+
+// Apply language on page load, then load health
 document.addEventListener("DOMContentLoaded", () => {
   if (currentLang === "th") {
     document.querySelectorAll(".lang-en, .lang-th").forEach(el => {
@@ -452,4 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     applyTranslations();
   }
+
+  // Load health data on page load
+  loadHealth();
 });

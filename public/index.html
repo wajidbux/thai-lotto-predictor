@@ -118,6 +118,51 @@
       <small id="lastUpdatedNote" style="color: #6b7280; font-size: 13px; margin-top: 8px; display: block;"></small>
     </div>
 
+    <!-- System Health Card -->
+    <div id="healthCard" class="card health-card">
+      <h2 id="healthHeader">
+        <span id="healthStatusDot" class="health-dot health-dot-ok"></span>
+        System Health
+      </h2>
+      <div class="health-grid">
+        <div class="health-section">
+          <div class="health-label" id="healthUptimeLabel">Server Uptime</div>
+          <div class="health-value" id="healthUptime">—</div>
+        </div>
+        <div class="health-section">
+          <div class="health-label" id="healthStartedLabel">Server Started</div>
+          <div class="health-value" id="healthStarted">—</div>
+        </div>
+        <div class="health-section">
+          <div class="health-label" id="healthMemoryLabel">Memory Usage</div>
+          <div class="health-value" id="healthMemory">—</div>
+        </div>
+        <div class="health-section">
+          <div class="health-label" id="healthNodeLabel">Node Version</div>
+          <div class="health-value" id="healthNode">—</div>
+        </div>
+      </div>
+      <div class="health-divider"></div>
+      <div class="health-events">
+        <div class="health-event">
+          <div class="health-event-icon" id="scrapeIcon">⏳</div>
+          <div class="health-event-body">
+            <div class="health-event-label" id="healthScrapeLabel">Last Scrape</div>
+            <div class="health-event-time" id="healthScrapeTime">Never</div>
+            <div class="health-event-msg" id="healthScrapeMsg"></div>
+          </div>
+        </div>
+        <div class="health-event">
+          <div class="health-event-icon" id="retrainIcon">⏳</div>
+          <div class="health-event-body">
+            <div class="health-event-label" id="healthRetrainLabel">Last Retrain</div>
+            <div class="health-event-time" id="healthRetrainTime">Never</div>
+            <div class="health-event-msg" id="healthRetrainMsg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <h2 id="bettingMarketsHeader">Betting Markets</h2>
 
     <div id="marketPredictions" class="market-grid"></div>
